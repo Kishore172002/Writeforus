@@ -110,6 +110,7 @@ function renderPostPage(post, siteUrl){
     <div class="footer-bottom">
       <span>© 2026 The Materials Desk. Reader-supported, independently written.</span>
       <span>Editorial mail: hello@thematerialsdesk.example</span>
+      <span><a href="../admin.html">Admin</a></span>
     </div>
   </div>
 </footer>

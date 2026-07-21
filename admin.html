@@ -6,25 +6,36 @@
 <title>Admin — The Materials Desk</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="stylesheet" href="style.css">
-<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 <style>
   #login-gate{
     position:fixed; inset:0; background:var(--paper); z-index:100;
-    display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px;
+    display:flex; align-items:center; justify-content:center;
   }
   #login-gate.hidden{ display:none; }
-  #login-gate .box{ text-align:center; max-width:360px; padding:32px; }
+  #login-gate .box{ text-align:center; max-width:360px; padding:32px; width:100%; }
   #login-gate h1{ font-size:1.4rem; margin-bottom:10px; }
   #login-gate p{ color:var(--ink-soft); font-size:0.92rem; margin-bottom:20px; }
+  #login-gate form{ display:grid; gap:14px; text-align:left; }
 </style>
 </head>
 <body>
 
 <div id="login-gate">
   <div class="box">
-    <h1>Admin sign-in required</h1>
-    <p>This panel is only for people invited via Netlify Identity. Log in to continue.</p>
-    <button type="button" class="btn" id="login-btn">Log in</button>
+    <h1>Admin sign-in</h1>
+    <p id="login-copy">Sign in with the email and password from your Netlify Identity invite.</p>
+    <form id="login-form">
+      <div class="field">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" required autocomplete="username">
+      </div>
+      <div class="field">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn" id="login-submit">Log in</button>
+      <div class="status-msg" id="login-status"></div>
+    </form>
   </div>
 </div>
 
@@ -49,7 +60,7 @@
   <div class="wrap">
     <section class="lead-block" style="padding-bottom:0;">
       <h1 style="font-size:2rem;">Compose a post</h1>
-      <p class="lede">This site has no server, so "publish" works in two steps: build the post here, then download the updated data file and upload it to your host in place of the old one. Every page (home, blog, and each post) reads from that one file.</p>
+      <p class="lede">Write a post, hit <strong>Publish live to the site</strong>, and it commits straight to GitHub — Netlify picks up the commit and redeploys automatically. Usually live within about a minute; the panel below will tell you when it's actually up.</p>
     </section>
 
     <div class="admin-grid">
@@ -447,41 +458,126 @@ importInput.addEventListener('change', e => {
   importInput.value = '';
 });
 
-/* ---------------- Netlify Identity auth gate ---------------- */
+/* ---------------- auth (direct GoTrue REST calls, no widget/popup) ---------------- */
+const IDENTITY_URL = window.location.origin + '/.netlify/identity';
+const SESSION_KEY = 'md_admin_session';
+
 const loginGate = document.getElementById('login-gate');
+const loginForm = document.getElementById('login-form');
+const loginCopy = document.getElementById('login-copy');
 const whoami = document.getElementById('whoami');
 
-function showApp(user){
+function saveSession(tokenResponse){
+  localStorage.setItem(SESSION_KEY, JSON.stringify({
+    access_token: tokenResponse.access_token,
+    refresh_token: tokenResponse.refresh_token,
+    expires_at: Date.now() + (tokenResponse.expires_in || 3600) * 1000
+  }));
+}
+function loadSession(){
+  try{ return JSON.parse(localStorage.getItem(SESSION_KEY)); }catch(e){ return null; }
+}
+function clearSession(){ localStorage.removeItem(SESSION_KEY); }
+
+async function getValidAccessToken(){
+  const session = loadSession();
+  if(!session) return null;
+  if(Date.now() < session.expires_at - 30000) return session.access_token;
+  // expired or close to it — try a refresh
+  try{
+    const res = await fetch(IDENTITY_URL + '/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ grant_type: 'refresh_token', refresh_token: session.refresh_token })
+    });
+    if(!res.ok) throw new Error('refresh failed');
+    const data = await res.json();
+    saveSession(data);
+    return data.access_token;
+  }catch(e){
+    clearSession();
+    return null;
+  }
+}
+
+async function fetchCurrentUser(token){
+  const res = await fetch(IDENTITY_URL + '/user', { headers: { Authorization: 'Bearer ' + token } });
+  if(!res.ok) return null;
+  return res.json();
+}
+
+function showApp(email){
   loginGate.classList.add('hidden');
-  whoami.textContent = user.email || user.user_metadata?.full_name || 'admin';
+  whoami.textContent = email || 'admin';
 }
-function showGate(){
+function showGate(message){
   loginGate.classList.remove('hidden');
+  if(message) loginCopy.textContent = message;
 }
 
-if(window.netlifyIdentity){
-  netlifyIdentity.on('init', user => { user ? showApp(user) : showGate(); });
-  netlifyIdentity.on('login', user => { showApp(user); netlifyIdentity.close(); });
-  netlifyIdentity.on('logout', () => { showGate(); });
-  netlifyIdentity.init();
-} else {
-  loginGate.querySelector('p').textContent = "Netlify Identity didn't load — this admin panel only works once deployed on Netlify with Identity enabled.";
+async function initAuth(){
+  const token = await getValidAccessToken();
+  if(!token){ showGate(); return; }
+  const user = await fetchCurrentUser(token);
+  if(!user){ clearSession(); showGate(); return; }
+  showApp(user.email);
 }
 
-document.getElementById('login-btn').addEventListener('click', () => netlifyIdentity.open('login'));
+loginForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const statusEl = document.getElementById('login-status');
+  document.getElementById('login-submit').disabled = true;
+  try{
+    const res = await fetch(IDENTITY_URL + '/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ grant_type: 'password', username: email, password: password })
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error_description || data.msg || 'Login failed');
+    saveSession(data);
+    showApp(email);
+    statusEl.className = 'status-msg';
+  }catch(err){
+    statusEl.textContent = err.message;
+    statusEl.className = 'status-msg show warn';
+  }finally{
+    document.getElementById('login-submit').disabled = false;
+  }
+});
+
 document.getElementById('logout-link').addEventListener('click', e => {
   e.preventDefault();
-  netlifyIdentity.logout();
+  clearSession();
+  showGate();
 });
 
 async function authHeader(){
-  const user = netlifyIdentity.currentUser();
-  if(!user) throw new Error('Not logged in');
-  const token = await user.jwt();
+  const token = await getValidAccessToken();
+  if(!token) throw new Error('Not logged in');
   return { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' };
 }
 
+initAuth();
+
 /* ---------------- publish live (calls the Netlify Function) ---------------- */
+async function waitForLive(url, statusElId, attempts){
+  attempts = attempts || 18; // ~90s at 5s intervals
+  for(let i = 0; i < attempts; i++){
+    await new Promise(r => setTimeout(r, 5000));
+    try{
+      const res = await fetch(url + '?cb=' + Date.now(), { cache: 'no-store' });
+      if(res.ok){
+        showStatus(statusElId, '🎉 Live now at ' + url, 'ok');
+        return;
+      }
+    }catch(e){ /* keep polling */ }
+  }
+  showStatus(statusElId, 'Committed — Netlify is still deploying. Check ' + url + ' in a moment.', 'warn');
+}
+
 document.getElementById('publish-live').addEventListener('click', async () => {
   const title = titleInput.value.trim();
   const contentHtml = editorArea.innerHTML.trim();
@@ -518,7 +614,8 @@ document.getElementById('publish-live').addEventListener('click', async () => {
     if(idx > -1){ postsState[idx] = post; } else { postsState.push(post); }
     editingId = post.id;
     renderPostList();
-    showStatus('editor-status', 'Published — live at ' + data.url + ' within about a minute.', 'ok');
+    showStatus('editor-status', 'Committed to GitHub — waiting for Netlify to deploy…', 'ok');
+    waitForLive(data.url, 'editor-status');
   }catch(err){
     showStatus('editor-status', 'Publish failed: ' + err.message, 'warn');
   }
