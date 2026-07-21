@@ -36,6 +36,22 @@
       </div>
       <button type="submit" class="btn" id="login-submit">Log in</button>
       <div class="status-msg" id="login-status"></div>
+      <p style="text-align:center;font-size:0.85rem;margin:2px 0 0;">
+        <a href="#" id="forgot-link">Forgot password?</a>
+      </p>
+    </form>
+
+    <form id="forgot-form" style="display:none;">
+      <p style="font-size:0.88rem;color:var(--ink-soft);margin:0 0 4px;">Enter your email and we'll send a reset link.</p>
+      <div class="field">
+        <label for="forgot-email">Email</label>
+        <input type="email" id="forgot-email" required autocomplete="username">
+      </div>
+      <button type="submit" class="btn" id="forgot-submit">Send reset link</button>
+      <div class="status-msg" id="forgot-status"></div>
+      <p style="text-align:center;font-size:0.85rem;margin:2px 0 0;">
+        <a href="#" id="back-to-login-link">Back to log in</a>
+      </p>
     </form>
 
     <form id="accept-form" style="display:none;">
@@ -622,6 +638,44 @@ document.getElementById('logout-link').addEventListener('click', e => {
   e.preventDefault();
   clearSession();
   showGate();
+});
+
+/* ---------------- forgot password ---------------- */
+const forgotForm = document.getElementById('forgot-form');
+document.getElementById('forgot-link').addEventListener('click', e => {
+  e.preventDefault();
+  document.getElementById('login-form').style.display = 'none';
+  forgotForm.style.display = 'grid';
+  document.getElementById('forgot-email').value = document.getElementById('login-email').value;
+});
+document.getElementById('back-to-login-link').addEventListener('click', e => {
+  e.preventDefault();
+  forgotForm.style.display = 'none';
+  document.getElementById('login-form').style.display = 'grid';
+});
+forgotForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = document.getElementById('forgot-email').value.trim();
+  const statusEl = document.getElementById('forgot-status');
+  document.getElementById('forgot-submit').disabled = true;
+  try{
+    const res = await fetch(IDENTITY_URL + '/recover', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    if(!res.ok){
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error_description || data.msg || 'Could not send reset link.');
+    }
+    statusEl.textContent = 'Check your email for a reset link.';
+    statusEl.className = 'status-msg show ok';
+  }catch(err){
+    statusEl.textContent = err.message;
+    statusEl.className = 'status-msg show warn';
+  }finally{
+    document.getElementById('forgot-submit').disabled = false;
+  }
 });
 
 async function authHeader(){
