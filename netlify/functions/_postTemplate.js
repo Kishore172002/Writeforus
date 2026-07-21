@@ -53,6 +53,7 @@ function renderPostPage(post, siteUrl){
 <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>
 </head>
 <body>
+<script src="../identity-redirect.js"></script>
 
 <header class="site">
   <div class="site-header-inner">

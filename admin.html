@@ -22,8 +22,9 @@
 
 <div id="login-gate">
   <div class="box">
-    <h1>Admin sign-in</h1>
+    <h1 id="gate-title">Admin sign-in</h1>
     <p id="login-copy">Sign in with the email and password from your Netlify Identity invite.</p>
+
     <form id="login-form">
       <div class="field">
         <label for="login-email">Email</label>
@@ -35,6 +36,19 @@
       </div>
       <button type="submit" class="btn" id="login-submit">Log in</button>
       <div class="status-msg" id="login-status"></div>
+    </form>
+
+    <form id="accept-form" style="display:none;">
+      <div class="field">
+        <label for="accept-password">Choose a password</label>
+        <input type="password" id="accept-password" required autocomplete="new-password" minlength="8">
+      </div>
+      <div class="field">
+        <label for="accept-password-confirm">Confirm password</label>
+        <input type="password" id="accept-password-confirm" required autocomplete="new-password" minlength="8">
+      </div>
+      <button type="submit" class="btn" id="accept-submit">Set password &amp; log in</button>
+      <div class="status-msg" id="accept-status"></div>
     </form>
   </div>
 </div>
@@ -456,6 +470,62 @@ importInput.addEventListener('change', e => {
   };
   reader.readAsText(file);
   importInput.value = '';
+});
+
+/* ---------------- invite / recovery token handling ---------------- */
+const acceptForm = document.getElementById('accept-form');
+const gateTitle = document.getElementById('gate-title');
+
+function parseHashToken(){
+  const hash = window.location.hash.replace(/^#/, '');
+  const params = new URLSearchParams(hash);
+  if(params.get('invite_token'))       return { type: 'signup',   token: params.get('invite_token') };
+  if(params.get('confirmation_token')) return { type: 'signup',   token: params.get('confirmation_token') };
+  if(params.get('recovery_token'))     return { type: 'recovery', token: params.get('recovery_token') };
+  return null;
+}
+
+const pendingToken = parseHashToken();
+
+if(pendingToken){
+  // Clean the token out of the URL so it can't be resubmitted or leaked via referrer
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+  document.getElementById('login-form').style.display = 'none';
+  acceptForm.style.display = 'grid';
+  gateTitle.textContent = pendingToken.type === 'recovery' ? 'Set a new password' : 'Finish setting up your account';
+  document.getElementById('login-copy').textContent = pendingToken.type === 'recovery'
+    ? 'Choose a new password for your admin login.'
+    : "You're accepting your invite — choose a password to finish setting up admin access.";
+}
+
+acceptForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const pw = document.getElementById('accept-password').value;
+  const pw2 = document.getElementById('accept-password-confirm').value;
+  const statusEl = document.getElementById('accept-status');
+  if(pw !== pw2){
+    statusEl.textContent = "Passwords don't match.";
+    statusEl.className = 'status-msg show warn';
+    return;
+  }
+  document.getElementById('accept-submit').disabled = true;
+  try{
+    const res = await fetch(IDENTITY_URL + '/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: pendingToken.type, token: pendingToken.token, password: pw })
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error_description || data.msg || 'Could not set password — the link may have expired.');
+    saveSession(data);
+    const user = await fetchCurrentUser(data.access_token);
+    showApp(user ? user.email : '');
+  }catch(err){
+    statusEl.textContent = err.message;
+    statusEl.className = 'status-msg show warn';
+  }finally{
+    document.getElementById('accept-submit').disabled = false;
+  }
 });
 
 /* ---------------- auth (direct GoTrue REST calls, no widget/popup) ---------------- */
