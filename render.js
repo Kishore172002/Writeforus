@@ -44,7 +44,7 @@ function renderRecentPosts(containerId, count){
       <span class="index">${String(i+1).padStart(2,'0')}</span>
       <div>
         <span class="tag">${mdEscape(p.category)}</span>
-        <h3><a class="title-link" href="post.html?post=${encodeURIComponent(p.id)}">${mdEscape(p.title)}</a></h3>
+        <h3><a class="title-link" href="posts/${p.id}.html">${mdEscape(p.title)}</a></h3>
         <p>${mdEscape(p.excerpt)}</p>
         <div class="meta">${mdEscape(p.readTime)} · ${formatDate(p.date)}</div>
       </div>
@@ -69,7 +69,7 @@ function renderBlogList(activeCategory){
       <span class="index">${String(i+1).padStart(2,'0')}</span>
       <div>
         <span class="tag">${mdEscape(p.category)}</span>
-        <h3><a class="title-link" href="post.html?post=${encodeURIComponent(p.id)}">${mdEscape(p.title)}</a></h3>
+        <h3><a class="title-link" href="posts/${p.id}.html">${mdEscape(p.title)}</a></h3>
         <p>${mdEscape(p.excerpt)}</p>
         <div class="meta">${mdEscape(p.readTime)} · ${formatDate(p.date)}</div>
       </div>

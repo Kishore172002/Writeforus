@@ -6,13 +6,32 @@
 <title>Admin — The Materials Desk</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="stylesheet" href="style.css">
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<style>
+  #login-gate{
+    position:fixed; inset:0; background:var(--paper); z-index:100;
+    display:flex; align-items:center; justify-content:center; flex-direction:column; gap:16px;
+  }
+  #login-gate.hidden{ display:none; }
+  #login-gate .box{ text-align:center; max-width:360px; padding:32px; }
+  #login-gate h1{ font-size:1.4rem; margin-bottom:10px; }
+  #login-gate p{ color:var(--ink-soft); font-size:0.92rem; margin-bottom:20px; }
+</style>
 </head>
 <body>
 
+<div id="login-gate">
+  <div class="box">
+    <h1>Admin sign-in required</h1>
+    <p>This panel is only for people invited via Netlify Identity. Log in to continue.</p>
+    <button type="button" class="btn" id="login-btn">Log in</button>
+  </div>
+</div>
+
 <div class="admin-banner">
   <div class="wrap">
-    <span>Admin panel — visible only to people with this link. Not linked from the public site.</span>
-    <a href="index.html">← Back to the live site</a>
+    <span>Admin panel — signed in as <strong id="whoami">...</strong></span>
+    <span><a href="index.html">← Back to the live site</a> &nbsp;·&nbsp; <a href="#" id="logout-link">Log out</a></span>
   </div>
 </div>
 
@@ -97,7 +116,8 @@
           </div>
 
           <div class="btn-row" style="margin-top:20px;">
-            <button type="button" class="btn" id="save-post">Save post to this session</button>
+            <button type="button" class="btn" id="publish-live">Publish live to the site</button>
+            <button type="button" class="btn secondary" id="save-post">Save to this session only</button>
             <button type="button" class="btn secondary" id="clear-form">Clear form / new post</button>
           </div>
           <div class="status-msg" id="editor-status"></div>
@@ -116,11 +136,11 @@
       <div>
         <div class="panel">
           <h2>Publish</h2>
-          <p class="panel-sub">Downloads a replacement <code>posts-data.js</code> containing every post below. Upload it to your host, overwriting the old file.</p>
+          <p class="panel-sub"><strong>Publish live to the site</strong> (in the editor panel) commits the post straight to your GitHub repo, which Netlify automatically rebuilds and deploys — usually live within about a minute, and it also creates a real crawlable page under <code>/posts/</code> for search engines.</p>
+          <p class="panel-sub">Prefer to do it manually, or working offline? Use the download/import backup below instead.</p>
           <div class="btn-row">
-            <button type="button" class="btn" id="download-posts">Download posts-data.js</button>
+            <button type="button" class="btn secondary" id="download-posts">Download posts-data.js (backup)</button>
           </div>
-          <p class="panel-sub" style="margin-top:14px;margin-bottom:0;">Have a previously exported file? Load it below to keep working from where you left off.</p>
           <div class="btn-row" style="margin-top:8px;">
             <button type="button" class="btn secondary" id="import-btn">Import posts-data.js</button>
           </div>
@@ -383,7 +403,8 @@ function renderPostList(){
       '</div>' +
       '<div class="pl-actions">' +
         '<button type="button" onclick="editPost(\'' + p.id + '\')">Edit</button>' +
-        '<button type="button" class="danger" onclick="deletePost(\'' + p.id + '\')">Delete</button>' +
+        '<button type="button" onclick="unpublishPost(\'' + p.id + '\')">Unpublish</button>' +
+        '<button type="button" class="danger" onclick="deletePost(\'' + p.id + '\')">Remove locally</button>' +
       '</div>' +
     '</div>'
   )).join('');
@@ -425,6 +446,105 @@ importInput.addEventListener('change', e => {
   reader.readAsText(file);
   importInput.value = '';
 });
+
+/* ---------------- Netlify Identity auth gate ---------------- */
+const loginGate = document.getElementById('login-gate');
+const whoami = document.getElementById('whoami');
+
+function showApp(user){
+  loginGate.classList.add('hidden');
+  whoami.textContent = user.email || user.user_metadata?.full_name || 'admin';
+}
+function showGate(){
+  loginGate.classList.remove('hidden');
+}
+
+if(window.netlifyIdentity){
+  netlifyIdentity.on('init', user => { user ? showApp(user) : showGate(); });
+  netlifyIdentity.on('login', user => { showApp(user); netlifyIdentity.close(); });
+  netlifyIdentity.on('logout', () => { showGate(); });
+  netlifyIdentity.init();
+} else {
+  loginGate.querySelector('p').textContent = "Netlify Identity didn't load — this admin panel only works once deployed on Netlify with Identity enabled.";
+}
+
+document.getElementById('login-btn').addEventListener('click', () => netlifyIdentity.open('login'));
+document.getElementById('logout-link').addEventListener('click', e => {
+  e.preventDefault();
+  netlifyIdentity.logout();
+});
+
+async function authHeader(){
+  const user = netlifyIdentity.currentUser();
+  if(!user) throw new Error('Not logged in');
+  const token = await user.jwt();
+  return { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' };
+}
+
+/* ---------------- publish live (calls the Netlify Function) ---------------- */
+document.getElementById('publish-live').addEventListener('click', async () => {
+  const title = titleInput.value.trim();
+  const contentHtml = editorArea.innerHTML.trim();
+  if(!title || !contentHtml){
+    showStatus('editor-status', 'Add a title and some content before publishing.', 'warn');
+    return;
+  }
+  const baseSlug = slugify(slugInput.value || title);
+  const id = editingId || uniqueSlug(baseSlug, null);
+  const existing = postsState.find(p => p.id === editingId);
+  const post = {
+    id: id,
+    title: title,
+    category: catSelect.value,
+    date: existing ? existing.date : new Date().toISOString().slice(0,10),
+    readTime: estimateReadTime(contentHtml),
+    excerpt: excerptInput.value.trim() || (contentHtml.replace(/<[^>]+>/g,' ').trim().slice(0,140) + '…'),
+    image: currentImage,
+    contentHtml: contentHtml
+  };
+
+  showStatus('editor-status', 'Publishing — committing to GitHub, Netlify will redeploy shortly…', 'ok');
+  try{
+    const headers = await authHeader();
+    const res = await fetch('/.netlify/functions/publish-post', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ action: 'save', post })
+    });
+    const data = await res.json();
+    if(!res.ok){ throw new Error(data.error || 'Publish failed'); }
+
+    const idx = postsState.findIndex(p => p.id === post.id);
+    if(idx > -1){ postsState[idx] = post; } else { postsState.push(post); }
+    editingId = post.id;
+    renderPostList();
+    showStatus('editor-status', 'Published — live at ' + data.url + ' within about a minute.', 'ok');
+  }catch(err){
+    showStatus('editor-status', 'Publish failed: ' + err.message, 'warn');
+  }
+});
+
+async function unpublishPost(id){
+  const post = postsState.find(p => p.id === id);
+  if(!post) return;
+  if(!confirm('Unpublish "' + post.title + '" from the live site? This removes it from GitHub and Netlify will redeploy.')) return;
+  try{
+    const headers = await authHeader();
+    const res = await fetch('/.netlify/functions/publish-post', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ action: 'delete', post: { id: post.id, title: post.title } })
+    });
+    const data = await res.json();
+    if(!res.ok){ throw new Error(data.error || 'Unpublish failed'); }
+    postsState = postsState.filter(p => p.id !== id);
+    if(editingId === id){ newPostForm(); }
+    renderPostList();
+    showStatus('list-status', 'Unpublished from the live site.', 'warn');
+  }catch(err){
+    showStatus('list-status', 'Unpublish failed: ' + err.message, 'warn');
+  }
+}
 
 /* ---------------- init ---------------- */
 renderPostList();
