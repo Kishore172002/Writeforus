@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin.html
 Disallow: /netlify/
 
-Sitemap: https://your-site.netlify.app/sitemap.xml
+Sitemap: https://thematerialdesk.netlify.app/sitemap.xml

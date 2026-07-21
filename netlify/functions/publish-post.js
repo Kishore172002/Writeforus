@@ -9,7 +9,7 @@
      GITHUB_OWNER   — defaults to "Kishore172002"
      GITHUB_REPO    — defaults to "Writeforus"
      GITHUB_BRANCH  — defaults to "main"
-     SITE_URL       — your live URL, e.g. https://your-site.netlify.app
+     SITE_URL       — your live URL, e.g. https://thematerialdesk.netlify.app
 */
 
 const { renderPostPage } = require('./_postTemplate');
@@ -17,7 +17,7 @@ const { renderPostPage } = require('./_postTemplate');
 const OWNER = process.env.GITHUB_OWNER || 'Kishore172002';
 const REPO = process.env.GITHUB_REPO || 'Writeforus';
 const BRANCH = process.env.GITHUB_BRANCH || 'main';
-const SITE_URL = process.env.SITE_URL || 'https://your-site.netlify.app';
+const SITE_URL = process.env.SITE_URL || 'https://thematerialdesk.netlify.app';
 const API = 'https://api.github.com';
 
 function toB64(str) { return Buffer.from(str, 'utf8').toString('base64'); }

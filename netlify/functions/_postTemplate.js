@@ -16,7 +16,7 @@ function categoryChipClass(cat){
 }
 
 function renderPostPage(post, siteUrl){
-  const base = (siteUrl || 'https://your-site.netlify.app').replace(/\/$/, '');
+  const base = (siteUrl || 'https://thematerialdesk.netlify.app').replace(/\/$/, '');
   const url = `${base}/posts/${post.id}.html`;
   const desc = escapeHtml(post.excerpt || '');
   const title = escapeHtml(post.title || '');
