@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — The Materials Desk</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="admin-banner">
+  <div class="wrap">
+    <span>Admin panel — visible only to people with this link. Not linked from the public site.</span>
+    <a href="index.html">← Back to the live site</a>
+  </div>
+</div>
+
+<header class="site">
+  <div class="site-header-inner">
+    <div class="brand">
+      <span class="name">The Materials Desk</span>
+      <span class="tag">Admin — compose &amp; publish</span>
+    </div>
+  </div>
+</header>
+<div class="grain tight"></div>
+
+<main>
+  <div class="wrap">
+    <section class="lead-block" style="padding-bottom:0;">
+      <h1 style="font-size:2rem;">Compose a post</h1>
+      <p class="lede">This site has no server, so "publish" works in two steps: build the post here, then download the updated data file and upload it to your host in place of the old one. Every page (home, blog, and each post) reads from that one file.</p>
+    </section>
+
+    <div class="admin-grid">
+      <!-- LEFT: editor -->
+      <div>
+        <div class="panel">
+          <h2 id="editor-heading">New post</h2>
+          <p class="panel-sub">Fields marked with the title and content are required before you can save.</p>
+
+          <div class="field" style="margin-bottom:14px;">
+            <label for="f-title">Blog title</label>
+            <input type="text" id="f-title" placeholder="e.g. How to choose plywood thickness for a wardrobe">
+          </div>
+
+          <div class="field-row" style="margin-bottom:14px;">
+            <div class="field">
+              <label for="f-category">Category</label>
+              <select id="f-category">
+                <option>Laminate</option>
+                <option>Veneer</option>
+                <option>Louvers</option>
+                <option>Plywood</option>
+                <option>General</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="f-slug">URL slug</label>
+              <input type="text" id="f-slug" placeholder="auto-generated from title">
+            </div>
+          </div>
+
+          <div class="field" style="margin-bottom:14px;">
+            <label for="f-excerpt">Short excerpt (shown on listing cards)</label>
+            <textarea id="f-excerpt" style="min-height:70px;" placeholder="One or two sentences summarising the post."></textarea>
+          </div>
+
+          <div class="field" style="margin-bottom:18px;">
+            <label>Featured image</label>
+            <div class="image-drop" id="image-drop">Click to choose an image, or drag one here</div>
+            <input type="file" id="f-image" accept="image/*" style="display:none;">
+            <img id="image-preview" class="image-preview" style="display:none;">
+            <button type="button" class="btn secondary" id="remove-image" style="display:none;margin-top:8px;padding:6px 14px;font-size:0.78rem;">Remove image</button>
+          </div>
+
+          <div class="field">
+            <label>Blog content</label>
+            <div class="editor-toolbar">
+              <button type="button" data-block="H1" title="Heading 1">H1</button>
+              <button type="button" data-block="H2" title="Heading 2">H2</button>
+              <button type="button" data-block="H3" title="Heading 3">H3</button>
+              <button type="button" data-block="P" title="Paragraph">P</button>
+              <span class="sep"></span>
+              <button type="button" data-cmd="bold" title="Bold"><b>B</b></button>
+              <button type="button" data-cmd="italic" title="Italic"><i>I</i></button>
+              <button type="button" data-cmd="insertUnorderedList" title="Bullet list">• List</button>
+              <span class="sep"></span>
+              <button type="button" id="btn-link" title="Insert link / anchor text">🔗 Link</button>
+              <button type="button" id="btn-img" title="Insert image in content">🖼 Image</button>
+              <span class="sep"></span>
+              <button type="button" data-cmd="undo" title="Undo">↺ Undo</button>
+            </div>
+            <div class="editor-area" id="editor-area" contenteditable="true" data-placeholder="Write the post here..."></div>
+            <input type="file" id="inline-image-input" accept="image/*" style="display:none;">
+          </div>
+
+          <div class="btn-row" style="margin-top:20px;">
+            <button type="button" class="btn" id="save-post">Save post to this session</button>
+            <button type="button" class="btn secondary" id="clear-form">Clear form / new post</button>
+          </div>
+          <div class="status-msg" id="editor-status"></div>
+        </div>
+
+        <div class="panel">
+          <h2>Live preview</h2>
+          <p class="panel-sub">Roughly how this post will look on the site.</p>
+          <div id="preview-pane">
+            <p style="color:var(--ink-soft);font-size:0.9rem;">Start typing above to see a preview here.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: post list + publish -->
+      <div>
+        <div class="panel">
+          <h2>Publish</h2>
+          <p class="panel-sub">Downloads a replacement <code>posts-data.js</code> containing every post below. Upload it to your host, overwriting the old file.</p>
+          <div class="btn-row">
+            <button type="button" class="btn" id="download-posts">Download posts-data.js</button>
+          </div>
+          <p class="panel-sub" style="margin-top:14px;margin-bottom:0;">Have a previously exported file? Load it below to keep working from where you left off.</p>
+          <div class="btn-row" style="margin-top:8px;">
+            <button type="button" class="btn secondary" id="import-btn">Import posts-data.js</button>
+          </div>
+          <input type="file" id="import-input" accept=".js" style="display:none;">
+          <div class="status-msg" id="list-status"></div>
+        </div>
+
+        <div class="panel">
+          <h2>All posts <span style="font-weight:400;color:var(--ink-soft);font-size:0.9rem;" id="post-count"></span></h2>
+          <p class="panel-sub">Click a post to edit it. Changes only take effect on the live site after you download and re-upload the file.</p>
+          <div id="post-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="posts-data.js"></script>
+<script>
+/* ---------------- state ---------------- */
+let postsState = JSON.parse(JSON.stringify(window.SITE_POSTS || []));
+let editingId = null;
+let currentImage = "";
+
+const editorArea = document.getElementById('editor-area');
+const titleInput = document.getElementById('f-title');
+const slugInput  = document.getElementById('f-slug');
+const catSelect  = document.getElementById('f-category');
+const excerptInput = document.getElementById('f-excerpt');
+
+/* ---------------- helpers ---------------- */
+function slugify(str){
+  return (str || '').toLowerCase().trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-+|-+$)/g, '') || ('post-' + Date.now());
+}
+function uniqueSlug(base, excludeId){
+  let slug = base, n = 2;
+  const taken = id => postsState.some(p => p.id === id && p.id !== excludeId);
+  while(taken(slug)){ slug = base + '-' + n; n++; }
+  return slug;
+}
+function escapeHtml(s){
+  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+}
+function estimateReadTime(html){
+  const text = html.replace(/<[^>]+>/g, ' ');
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 200)) + ' min read';
+}
+function showStatus(elId, msg, type){
+  const el = document.getElementById(elId);
+  el.textContent = msg;
+  el.className = 'status-msg show ' + (type || 'ok');
+  setTimeout(() => el.classList.remove('show'), 5000);
+}
+function categoryChipClass(cat){
+  const map = { Laminate:'laminate', Veneer:'veneer', Louvers:'louvers', Plywood:'plywood' };
+  return map[cat] || 'laminate';
+}
+
+/* ---------------- toolbar ---------------- */
+document.querySelectorAll('.editor-toolbar button[data-cmd]').forEach(btn => {
+  btn.addEventListener('mousedown', e => {
+    e.preventDefault();
+    document.execCommand(btn.dataset.cmd, false, null);
+    updatePreview();
+  });
+});
+document.querySelectorAll('.editor-toolbar button[data-block]').forEach(btn => {
+  btn.addEventListener('mousedown', e => {
+    e.preventDefault();
+    document.execCommand('formatBlock', false, btn.dataset.block);
+    updatePreview();
+  });
+});
+
+document.getElementById('btn-link').addEventListener('mousedown', e => {
+  e.preventDefault();
+  const url = prompt('Link URL (include https://)');
+  if(!url) return;
+  const sel = window.getSelection();
+  if(!sel || sel.toString().length === 0){
+    const text = prompt('Link text', url) || url;
+    document.execCommand('insertHTML', false, '<a href="' + url.replace(/"/g,'&quot;') + '" target="_blank" rel="noopener">' + escapeHtml(text) + '</a>');
+  } else {
+    document.execCommand('createLink', false, url);
+  }
+  updatePreview();
+});
+
+const inlineImageInput = document.getElementById('inline-image-input');
+document.getElementById('btn-img').addEventListener('mousedown', e => {
+  e.preventDefault();
+  inlineImageInput.click();
+});
+inlineImageInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    document.execCommand('insertImage', false, ev.target.result);
+    updatePreview();
+  };
+  reader.readAsDataURL(file);
+  inlineImageInput.value = '';
+});
+
+editorArea.addEventListener('input', updatePreview);
+titleInput.addEventListener('input', () => {
+  if(!slugInput.dataset.manual){ slugInput.value = slugify(titleInput.value); }
+  updatePreview();
+});
+slugInput.addEventListener('input', () => { slugInput.dataset.manual = '1'; });
+excerptInput.addEventListener('input', updatePreview);
+catSelect.addEventListener('change', updatePreview);
+
+/* ---------------- featured image ---------------- */
+const imageDrop = document.getElementById('image-drop');
+const imageFileInput = document.getElementById('f-image');
+const imagePreview = document.getElementById('image-preview');
+const removeImageBtn = document.getElementById('remove-image');
+
+imageDrop.addEventListener('click', () => imageFileInput.click());
+imageFileInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    currentImage = ev.target.result;
+    imagePreview.src = currentImage;
+    imagePreview.style.display = 'block';
+    removeImageBtn.style.display = 'inline-block';
+    updatePreview();
+  };
+  reader.readAsDataURL(file);
+});
+removeImageBtn.addEventListener('click', () => {
+  currentImage = '';
+  imagePreview.style.display = 'none';
+  removeImageBtn.style.display = 'none';
+  updatePreview();
+});
+['dragover','drop'].forEach(evt => imageDrop.addEventListener(evt, e => e.preventDefault()));
+imageDrop.addEventListener('drop', e => {
+  const file = e.dataTransfer.files[0];
+  if(file){ imageFileInput.files = e.dataTransfer.files; imageFileInput.dispatchEvent(new Event('change')); }
+});
+
+/* ---------------- preview ---------------- */
+function updatePreview(){
+  const pane = document.getElementById('preview-pane');
+  const title = titleInput.value.trim();
+  if(!title && editorArea.innerHTML.trim() === ''){
+    pane.innerHTML = '<p style="color:var(--ink-soft);font-size:0.9rem;">Start typing above to see a preview here.</p>';
+    return;
+  }
+  const heroImg = currentImage
+    ? '<img src="' + currentImage + '" style="width:100%;border-radius:3px;border:1px solid var(--line-strong);margin-bottom:14px;">'
+    : '<span class="chip ' + categoryChipClass(catSelect.value) + '" style="display:block;width:100%;height:120px;border-radius:3px;margin-bottom:14px;"></span>';
+  pane.innerHTML =
+    '<span class="tag">' + escapeHtml(catSelect.value) + '</span>' +
+    '<h3 style="margin:8px 0 12px;">' + escapeHtml(title || 'Untitled post') + '</h3>' +
+    heroImg +
+    '<div class="prose">' + editorArea.innerHTML + '</div>';
+}
+
+/* ---------------- save / new / edit / delete ---------------- */
+document.getElementById('save-post').addEventListener('click', () => {
+  const title = titleInput.value.trim();
+  const contentHtml = editorArea.innerHTML.trim();
+  if(!title || !contentHtml){
+    showStatus('editor-status', 'Add a title and some content before saving.', 'warn');
+    return;
+  }
+  const baseSlug = slugify(slugInput.value || title);
+  const id = editingId || uniqueSlug(baseSlug, null);
+  const existing = postsState.find(p => p.id === editingId);
+  const post = {
+    id: id,
+    title: title,
+    category: catSelect.value,
+    date: existing ? existing.date : new Date().toISOString().slice(0,10),
+    readTime: estimateReadTime(contentHtml),
+    excerpt: excerptInput.value.trim() || (contentHtml.replace(/<[^>]+>/g,' ').trim().slice(0,140) + '…'),
+    image: currentImage,
+    contentHtml: contentHtml
+  };
+  const idx = postsState.findIndex(p => p.id === editingId);
+  if(idx > -1){ postsState[idx] = post; } else { postsState.push(post); }
+  editingId = post.id;
+  renderPostList();
+  showStatus('editor-status', 'Saved to this session. Download posts-data.js to publish it live.', 'ok');
+});
+
+document.getElementById('clear-form').addEventListener('click', () => newPostForm());
+
+function newPostForm(){
+  editingId = null;
+  currentImage = '';
+  titleInput.value = '';
+  slugInput.value = '';
+  delete slugInput.dataset.manual;
+  catSelect.value = 'Laminate';
+  excerptInput.value = '';
+  editorArea.innerHTML = '';
+  imagePreview.style.display = 'none';
+  removeImageBtn.style.display = 'none';
+  document.getElementById('editor-heading').textContent = 'New post';
+  updatePreview();
+}
+
+function editPost(id){
+  const post = postsState.find(p => p.id === id);
+  if(!post) return;
+  editingId = post.id;
+  currentImage = post.image || '';
+  titleInput.value = post.title;
+  slugInput.value = post.id;
+  slugInput.dataset.manual = '1';
+  catSelect.value = post.category;
+  excerptInput.value = post.excerpt;
+  editorArea.innerHTML = post.contentHtml;
+  if(currentImage){
+    imagePreview.src = currentImage;
+    imagePreview.style.display = 'block';
+    removeImageBtn.style.display = 'inline-block';
+  } else {
+    imagePreview.style.display = 'none';
+    removeImageBtn.style.display = 'none';
+  }
+  document.getElementById('editor-heading').textContent = 'Editing: ' + post.title;
+  updatePreview();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function deletePost(id){
+  const post = postsState.find(p => p.id === id);
+  if(!post) return;
+  if(!confirm('Remove "' + post.title + '" from this session? This does not undo on the live site until you download and re-upload the file.')) return;
+  postsState = postsState.filter(p => p.id !== id);
+  if(editingId === id){ newPostForm(); }
+  renderPostList();
+  showStatus('list-status', 'Removed from this session.', 'warn');
+}
+
+function renderPostList(){
+  const list = document.getElementById('post-list');
+  document.getElementById('post-count').textContent = '(' + postsState.length + ')';
+  if(postsState.length === 0){
+    list.innerHTML = '<p style="color:var(--ink-soft);font-size:0.9rem;">No posts yet — save one above.</p>';
+    return;
+  }
+  const sorted = [...postsState].sort((a,b) => a.date < b.date ? 1 : -1);
+  list.innerHTML = sorted.map(p => (
+    '<div class="post-list-item">' +
+      '<div>' +
+        '<div class="pl-title">' + escapeHtml(p.title) + '</div>' +
+        '<div class="pl-meta">' + escapeHtml(p.category) + ' · ' + escapeHtml(p.date) + '</div>' +
+      '</div>' +
+      '<div class="pl-actions">' +
+        '<button type="button" onclick="editPost(\'' + p.id + '\')">Edit</button>' +
+        '<button type="button" class="danger" onclick="deletePost(\'' + p.id + '\')">Delete</button>' +
+      '</div>' +
+    '</div>'
+  )).join('');
+}
+
+/* ---------------- publish / import ---------------- */
+document.getElementById('download-posts').addEventListener('click', () => {
+  const header = "/* Generated by the admin panel — replace the old posts-data.js on your host with this file. */\n\nwindow.SITE_POSTS = ";
+  const body = JSON.stringify(postsState, null, 2);
+  const text = header + body + ";\n";
+  const blob = new Blob([text], { type: 'text/javascript' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'posts-data.js';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showStatus('list-status', 'Downloaded posts-data.js — upload it to your host to publish these changes.', 'ok');
+});
+
+const importInput = document.getElementById('import-input');
+document.getElementById('import-btn').addEventListener('click', () => importInput.click());
+importInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try{
+      const script = document.createElement('script');
+      script.textContent = ev.target.result;
+      document.body.appendChild(script);
+      document.body.removeChild(script);
+      postsState = JSON.parse(JSON.stringify(window.SITE_POSTS || []));
+      renderPostList();
+      showStatus('list-status', 'Imported ' + postsState.length + ' posts from file.', 'ok');
+    }catch(err){
+      showStatus('list-status', "Couldn't read that file — make sure it's a posts-data.js export.", 'warn');
+    }
+  };
+  reader.readAsText(file);
+  importInput.value = '';
+});
+
+/* ---------------- init ---------------- */
+renderPostList();
+</script>
+</body>
+</html>

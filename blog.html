@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog — The Materials Desk</title>
+<meta name="description" content="All posts on laminate, veneer, louvers and plywood from The Materials Desk.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="site-header-inner">
+    <div class="brand">
+      <span class="name">The Materials Desk</span>
+      <span class="tag">Notes on interior materials</span>
+    </div>
+    <nav class="primary">
+      <a href="index.html">Home</a>
+      <a href="blog.html" class="active">Blog</a>
+      <a href="about.html">About Us</a>
+      <a href="write-for-us.html">Write For Us</a>
+      <a href="contact.html">Contact Us</a>
+    </nav>
+  </div>
+</header>
+<div class="grain"></div>
+
+<main>
+  <div class="wrap">
+    <section class="lead-block">
+      <h1>The Blog</h1>
+      <p class="lede">Buying guides, maintenance notes and small case studies from real renovations — organised by material.</p>
+      <div class="tag-row" id="filter-row">
+        <span class="tag-pill active" data-category="All">All</span>
+        <span class="tag-pill" data-category="Laminate">Laminate</span>
+        <span class="tag-pill" data-category="Veneer">Veneer</span>
+        <span class="tag-pill" data-category="Louvers">Louvers</span>
+        <span class="tag-pill" data-category="Plywood">Plywood</span>
+      </div>
+    </section>
+
+    <section class="posts" id="blog-posts" style="margin-top:26px;">
+      <!-- rendered from posts-data.js -->
+    </section>
+  </div>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div class="footer-inner">
+      <div class="col">
+        <h4>The Materials Desk</h4>
+        <p style="font-size:0.9rem;color:var(--ink-soft);max-width:32ch;">Independent notes on laminate, veneer, louvers and plywood, written for people renovating in Salem and Chennai.</p>
+      </div>
+      <div class="col">
+        <h4>Site</h4>
+        <a href="index.html">Home</a>
+        <a href="blog.html">Blog</a>
+        <a href="about.html">About Us</a>
+      </div>
+      <div class="col">
+        <h4>Get involved</h4>
+        <a href="write-for-us.html">Write For Us</a>
+        <a href="contact.html">Contact Us</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 The Materials Desk. Reader-supported, independently written.</span>
+      <span>Editorial mail: hello@thematerialsdesk.example</span>
+    </div>
+  </div>
+</footer>
+
+<script src="posts-data.js"></script>
+<script src="render.js"></script>
+<script>
+  (function(){
+    const params = new URLSearchParams(window.location.search);
+    const wanted = params.get('cat');
+    if(wanted){
+      document.querySelectorAll('.tag-pill').forEach(p => {
+        p.classList.toggle('active', p.dataset.category === wanted);
+      });
+    }
+    initBlogFilters();
+    if(wanted){ renderBlogList(wanted); }
+  })();
+</script>
+</body>
+</html>
