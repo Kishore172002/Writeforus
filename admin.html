@@ -32,7 +32,10 @@
       </div>
       <div class="field">
         <label for="login-password">Password</label>
-        <input type="password" id="login-password" required autocomplete="current-password">
+        <div style="display:flex;gap:8px;">
+          <input type="password" id="login-password" required autocomplete="current-password" style="flex:1;">
+          <button type="button" id="toggle-pw" style="border:1px solid var(--line-strong);background:var(--card);padding:0 12px;border-radius:3px;cursor:pointer;font-size:0.8rem;color:var(--ink-soft);">Show</button>
+        </div>
       </div>
       <button type="submit" class="btn" id="login-submit">Log in</button>
       <div class="status-msg" id="login-status"></div>
@@ -57,7 +60,10 @@
     <form id="accept-form" style="display:none;">
       <div class="field">
         <label for="accept-password">Choose a password</label>
-        <input type="password" id="accept-password" required autocomplete="new-password" minlength="8">
+        <div style="display:flex;gap:8px;">
+          <input type="password" id="accept-password" required autocomplete="new-password" minlength="8" style="flex:1;">
+          <button type="button" id="toggle-pw-accept" style="border:1px solid var(--line-strong);background:var(--card);padding:0 12px;border-radius:3px;cursor:pointer;font-size:0.8rem;color:var(--ink-soft);">Show</button>
+        </div>
       </div>
       <div class="field">
         <label for="accept-password-confirm">Confirm password</label>
@@ -487,6 +493,19 @@ importInput.addEventListener('change', e => {
   reader.readAsText(file);
   importInput.value = '';
 });
+
+/* ---------------- show/hide password toggles ---------------- */
+function wireShowHide(buttonId, inputId){
+  const btn = document.getElementById(buttonId);
+  const input = document.getElementById(inputId);
+  btn.addEventListener('click', () => {
+    const showing = input.type === 'text';
+    input.type = showing ? 'password' : 'text';
+    btn.textContent = showing ? 'Show' : 'Hide';
+  });
+}
+wireShowHide('toggle-pw', 'login-password');
+wireShowHide('toggle-pw-accept', 'accept-password');
 
 /* ---------------- invite / recovery token handling ---------------- */
 const acceptForm = document.getElementById('accept-form');
