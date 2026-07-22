@@ -60,5 +60,15 @@ window.SITE_POSTS = [
     "excerpt": "A rough sheet-count worksheet so you can sanity-check a carpenter's quote before work starts, plus where waste typically comes from.",
     "image": "",
     "contentHtml": "\n      <p>Plywood sheet counts are one of the easiest places for a quote to drift without anyone noticing — a standard 8x4 sheet has a fixed area, but how much of it becomes usable furniture depends heavily on cutting layout and waste, which most quotes don't itemise.</p>\n      <h2>A rough starting point</h2>\n      <p>A typical two-door wardrobe for a 10x10 bedroom — roughly 7ft tall, 4ft wide, 2ft deep, with shutters, shelving, a hanging rod section and a back panel — commonly uses somewhere between 4.5 and 6 standard 8x4 sheets, depending on shelf count and back panelling choice.</p>\n      <h2>Where the sheets actually go</h2>\n      <ul>\n        <li>Carcass (sides, top, bottom, shelves): the largest share, usually 2.5–3 sheets</li>\n        <li>Shutters and doors: roughly 1–1.5 sheets depending on door count and style</li>\n        <li>Back panel: often a thinner sheet (6mm) rather than full-thickness ply, worth checking which your quote assumes</li>\n        <li>Waste and offcuts: typically 10–15% of total area, higher with more intricate shelving</li>\n      </ul>\n      <h2>A quick sanity check</h2>\n      <p>Before work starts, ask for the sheet count broken out by these categories rather than a single lump figure. If the back panel isn't specified separately, ask directly whether it's full-thickness ply or a thinner board — this single swap accounts for a meaningful chunk of quote variance we've seen between otherwise similar bids.</p>\n      <h2>Where waste creeps in</h2>\n      <p>Waste is highest when shelf widths don't divide evenly into an 8x4 sheet, forcing an extra sheet to be opened for a small offcut. A carpenter working from a cutting plan rather than cutting as they go typically wastes less — it's a fair question to ask before work begins.</p>\n    "
+  },
+  {
+    "id": "afe",
+    "title": "afe",
+    "category": "Laminate",
+    "date": "2026-07-22",
+    "readTime": "1 min read",
+    "excerpt": "awa",
+    "image": "",
+    "contentHtml": "afae"
   }
 ];
