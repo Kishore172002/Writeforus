@@ -1,5 +1,5 @@
 /* ============================================================
-   The Materials Desk — render.js
+   The Living Edit — render.js
    Reads window.SITE_POSTS (from posts-data.js) and renders it
    into whichever page includes this script. No build step,
    no server required — works straight off the filesystem.
@@ -19,7 +19,7 @@ function formatDate(iso){
 }
 
 function categoryChipClass(cat){
-  const map = { Laminate:'laminate', Veneer:'veneer', Louvers:'louvers', Plywood:'plywood' };
+  const map = { Laminate:'laminate', Veneer:'veneer', Louvers:'louvers', Plywood:'plywood', 'Interior Decor':'interior-decor', 'Home Improvement':'home-improvement', Fashion:'fashion', Lifestyle:'lifestyle' };
   return map[cat] || 'laminate';
 }
 
@@ -104,11 +104,11 @@ function renderSinglePost(){
         <p class="lede">This article may have been unpublished or the link is out of date.</p>
         <p><a href="blog.html">← Back to the blog</a></p>
       </div>`;
-    document.title = 'Post not found — The Materials Desk';
+    document.title = 'Post not found — The Living Edit';
     return;
   }
 
-  document.title = post.title + ' — The Materials Desk';
+  document.title = post.title + ' — The Living Edit';
   const heroImg = post.image
     ? `<img src="${post.image}" alt="${mdEscape(post.title)}" style="width:100%;border-radius:3px;border:1px solid var(--line-strong);margin:22px 0 8px;">`
     : `<span class="chip ${categoryChipClass(post.category)}" style="display:block;width:100%;height:220px;border-radius:3px;margin:22px 0 8px;"></span>`;

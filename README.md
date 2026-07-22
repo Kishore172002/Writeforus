@@ -1,4 +1,4 @@
-# The Materials Desk
+# The Living Edit
 
 Independent blog covering laminate, veneer, louvers and plywood for renovators in Salem & Chennai.
 
@@ -6,7 +6,7 @@ Independent blog covering laminate, veneer, louvers and plywood for renovators i
 - `index.html` — home
 - `blog.html` — post listing with category filters
 - `post.html` — single post template (reads `?post=<id>` from `posts-data.js`)
-- `about.html`, `contact.html`, `write-for-us.html`
+- `about.html`, `write-for-us.html`
 - `admin.html` — content authoring panel (not linked from public nav)
 - `posts-data.js` — all post content (the site's "database")
 - `render.js` — shared rendering logic

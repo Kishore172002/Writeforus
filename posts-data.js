@@ -1,5 +1,5 @@
 /* ============================================================
-   The Materials Desk — post data
+   The Living Edit — post data
    This file is the site's "database". The admin panel reads it
    on load and can export a replacement copy of this exact file.
    No server or build step needed — plain pages include this via

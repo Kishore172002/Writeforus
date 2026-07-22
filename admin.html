@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin — The Materials Desk</title>
+<title>Admin — The Living Edit</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="stylesheet" href="style.css">
 <style>
@@ -79,7 +79,7 @@
 <header class="site">
   <div class="site-header-inner">
     <div class="brand">
-      <span class="name">The Materials Desk</span>
+      <span class="name">The Living Edit</span>
       <span class="tag">Admin — compose &amp; publish</span>
     </div>
   </div>
@@ -109,6 +109,10 @@
             <div class="field">
               <label for="f-category">Category</label>
               <select id="f-category">
+                <option>Interior Decor</option>
+                <option>Home Improvement</option>
+                <option>Fashion</option>
+                <option>Lifestyle</option>
                 <option>Laminate</option>
                 <option>Veneer</option>
                 <option>Louvers</option>
@@ -239,7 +243,7 @@ function showStatus(elId, msg, type){
   setTimeout(() => el.classList.remove('show'), 5000);
 }
 function categoryChipClass(cat){
-  const map = { Laminate:'laminate', Veneer:'veneer', Louvers:'louvers', Plywood:'plywood' };
+  const map = { Laminate:'laminate', Veneer:'veneer', Louvers:'louvers', Plywood:'plywood', 'Interior Decor':'interior-decor', 'Home Improvement':'home-improvement', Fashion:'fashion', Lifestyle:'lifestyle' };
   return map[cat] || 'laminate';
 }
 

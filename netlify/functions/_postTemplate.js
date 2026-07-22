@@ -11,7 +11,7 @@ function escapeHtml(str){
 }
 
 function categoryChipClass(cat){
-  const map = { Laminate: 'laminate', Veneer: 'veneer', Louvers: 'louvers', Plywood: 'plywood' };
+  const map = { Laminate: 'laminate', Veneer: 'veneer', Louvers: 'louvers', Plywood: 'plywood', 'Interior Decor': 'interior-decor', 'Home Improvement': 'home-improvement', Fashion: 'fashion', Lifestyle: 'lifestyle' };
   return map[cat] || 'laminate';
 }
 
@@ -31,8 +31,8 @@ function renderPostPage(post, siteUrl){
     "headline": post.title,
     "datePublished": post.date,
     "dateModified": post.date,
-    "author": { "@type": "Organization", "name": "The Materials Desk" },
-    "publisher": { "@type": "Organization", "name": "The Materials Desk" },
+    "author": { "@type": "Organization", "name": "The Living Edit" },
+    "publisher": { "@type": "Organization", "name": "The Living Edit" },
     "description": post.excerpt,
     "mainEntityOfPage": url
   };
@@ -42,7 +42,7 @@ function renderPostPage(post, siteUrl){
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${title} — The Materials Desk</title>
+<title>${title} — The Living Edit</title>
 <meta name="description" content="${desc}">
 <link rel="canonical" href="${url}">
 <meta property="og:title" content="${title}">
@@ -58,16 +58,14 @@ function renderPostPage(post, siteUrl){
 <header class="site">
   <div class="site-header-inner">
     <div class="brand">
-      <span class="name">The Materials Desk</span>
-      <span class="tag">Notes on interior materials</span>
+      <span class="name">The Living Edit</span>
+      <span class="tag">Interior decor, home & lifestyle stories</span>
     </div>
     <nav class="primary">
       <a href="../index.html">Home</a>
       <a href="../blog.html" class="active">Blog</a>
       <a href="../about.html">About Us</a>
-      <a href="../write-for-us.html">Write For Us</a>
-      <a href="../contact.html">Contact Us</a>
-    </nav>
+      <a href="../write-for-us.html">Write For Us</a>    </nav>
   </div>
 </header>
 <div class="grain"></div>
@@ -93,8 +91,8 @@ function renderPostPage(post, siteUrl){
   <div class="wrap">
     <div class="footer-inner">
       <div class="col">
-        <h4>The Materials Desk</h4>
-        <p style="font-size:0.9rem;color:var(--ink-soft);max-width:32ch;">Independent notes on laminate, veneer, louvers and plywood, written for people renovating in Salem and Chennai.</p>
+        <h4>The Living Edit</h4>
+        <p style="font-size:0.9rem;color:var(--ink-soft);max-width:32ch;">Independent writing on interior decor, home improvement, fashion and lifestyle — from real projects, not press releases.</p>
       </div>
       <div class="col">
         <h4>Site</h4>
@@ -104,13 +102,11 @@ function renderPostPage(post, siteUrl){
       </div>
       <div class="col">
         <h4>Get involved</h4>
-        <a href="../write-for-us.html">Write For Us</a>
-        <a href="../contact.html">Contact Us</a>
-      </div>
+        <a href="../write-for-us.html">Write For Us</a>      </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 The Materials Desk. Reader-supported, independently written.</span>
-      <span>Editorial mail: hello@thematerialsdesk.example</span>
+      <span>© 2026 The Living Edit. Reader-supported, independently written.</span>
+      <span>Editorial mail: guestpostcollective@gmail.com</span>
       <span><a href="../admin.html">Admin</a></span>
     </div>
   </div>

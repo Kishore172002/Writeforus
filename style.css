@@ -183,6 +183,10 @@ nav.primary a.active{ color: var(--walnut-deep); border-color: var(--walnut-deep
 .chip.veneer{ background: repeating-linear-gradient(90deg,#8B5A34,#8B5A34 3px,#6E4426 3px,#6E4426 5px); }
 .chip.louvers{ background: repeating-linear-gradient(90deg,var(--slate),var(--slate) 6px,#2B372F 6px,#2B372F 8px); }
 .chip.plywood{ background: repeating-linear-gradient(0deg,#D9C9A3,#D9C9A3 4px,#C7B285 4px,#C7B285 8px); }
+.chip.interior-decor{ background: repeating-linear-gradient(100deg,#C79A5B,#C79A5B 5px,#8B5A34 5px,#8B5A34 10px); }
+.chip.home-improvement{ background: repeating-linear-gradient(45deg,#5B3A29,#5B3A29 6px,#3F5049 6px,#3F5049 12px); }
+.chip.fashion{ background: repeating-linear-gradient(135deg,#A6626B,#A6626B 4px,#C79A5B 4px,#C79A5B 8px); }
+.chip.lifestyle{ background: repeating-linear-gradient(90deg,#D9C9A3,#D9C9A3 5px,#EAE3D2 5px,#EAE3D2 10px); }
 .swatch .label{ font-family:'Fraunces', serif; font-weight:650; font-size:1.05rem; }
 .swatch .desc{ font-size: 0.9rem; color: var(--ink-soft); }
 .swatch .goto{ font-size: 0.82rem; font-weight:600; margin-top: auto; }
