@@ -199,13 +199,13 @@ nav.primary a.active{ color: var(--walnut-deep); border-color: var(--walnut-deep
 }
 .post-card{
   display:grid;
-  grid-template-columns: 120px 1fr;
+  grid-template-columns: 120px minmax(0, 1fr) auto;
   gap: 22px;
   padding: 22px 0;
   border-bottom: 1px solid var(--line);
   align-items: start;
 }
-@media (max-width:560px){ .post-card{ grid-template-columns: 1fr; } }
+@media (max-width:560px){ .post-card{ grid-template-columns: 50px minmax(0, 1fr); } }
 .post-card .index{
   font-family:'Fraunces', serif;
   font-size: 2.1rem;
@@ -292,8 +292,25 @@ nav.primary a.active{ color: var(--walnut-deep); border-color: var(--walnut-deep
   font-weight: 500;
   background: var(--card);
   color: var(--ink-soft);
+  font-family: inherit;
+  cursor: pointer;
 }
 .tag-pill.active{ background: var(--walnut-deep); color: var(--card); border-color: var(--walnut-deep); }
+
+.post-card-body{ min-width:0; }
+.post-card-media{ align-self:center; }
+.post-card-thumb{
+  width:160px;
+  height:106px;
+  object-fit:cover;
+  border-radius:3px;
+  border:1px solid var(--line-strong);
+  display:block;
+}
+@media (max-width:560px){
+  .post-card-media{ grid-column:2; }
+  .post-card-thumb{ width:120px; height:80px; }
+}
 
 /* ---------- form ---------- */
 form.contact-form{

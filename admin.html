@@ -114,13 +114,18 @@
           <div class="field-row" style="margin-bottom:14px;">
             <div class="field">
               <label for="f-category">Category</label>
-              <select id="f-category">
-                <option>Interior Decor</option>
-                <option>Home Improvement</option>
-                <option>Fashion</option>
-                <option>Lifestyle</option>
-                <option>General</option>
-              </select>
+              <input type="text" id="f-category" list="category-options" value="Interior Decor" placeholder="Choose or type a new category">
+              <datalist id="category-options">
+                <option value="Interior Decor"><option value="Home Improvement">
+                <option value="Fashion"><option value="Lifestyle">
+                <option value="Architecture"><option value="Furniture">
+                <option value="Kitchen"><option value="Bedroom">
+                <option value="Bathroom"><option value="Garden & Outdoors">
+                <option value="DIY"><option value="Renovation">
+                <option value="Materials"><option value="Product Reviews">
+                <option value="Buying Guides"><option value="Sustainability">
+                <option value="Wellness"><option value="General">
+              </datalist>
             </div>
             <div class="field">
               <label for="f-slug">URL slug</label>
@@ -139,6 +144,11 @@
             <input type="file" id="f-image" accept="image/*" style="display:none;">
             <img id="image-preview" class="image-preview" style="display:none;">
             <button type="button" class="btn secondary" id="remove-image" style="display:none;margin-top:8px;padding:6px 14px;font-size:0.78rem;">Remove image</button>
+          </div>
+          <div class="field" style="margin:-6px 0 18px;">
+            <label for="f-image-alt">Featured image alt text</label>
+            <input type="text" id="f-image-alt" placeholder="Describe what is visible in the image">
+            <small style="color:var(--ink-soft);">Used by screen readers and search engines. Keep it short and specific.</small>
           </div>
 
           <div class="field">
@@ -217,6 +227,7 @@ const titleInput = document.getElementById('f-title');
 const slugInput  = document.getElementById('f-slug');
 const catSelect  = document.getElementById('f-category');
 const excerptInput = document.getElementById('f-excerpt');
+const imageAltInput = document.getElementById('f-image-alt');
 
 /* ---------------- helpers ---------------- */
 function slugify(str){
@@ -304,6 +315,8 @@ titleInput.addEventListener('input', () => {
 slugInput.addEventListener('input', () => { slugInput.dataset.manual = '1'; });
 excerptInput.addEventListener('input', updatePreview);
 catSelect.addEventListener('change', updatePreview);
+catSelect.addEventListener('input', updatePreview);
+imageAltInput.addEventListener('input', updatePreview);
 
 /* ---------------- featured image ---------------- */
 const imageDrop = document.getElementById('image-drop');
@@ -346,7 +359,7 @@ function updatePreview(){
     return;
   }
   const heroImg = currentImage
-    ? '<img src="' + currentImage + '" style="width:100%;border-radius:3px;border:1px solid var(--line-strong);margin-bottom:14px;">'
+    ? '<img src="' + currentImage + '" alt="' + escapeHtml(imageAltInput.value.trim() || title || 'Featured image') + '" style="width:100%;border-radius:3px;border:1px solid var(--line-strong);margin-bottom:14px;">'
     : '<span class="chip ' + categoryChipClass(catSelect.value) + '" style="display:block;width:100%;height:120px;border-radius:3px;margin-bottom:14px;"></span>';
   pane.innerHTML =
     '<span class="tag">' + escapeHtml(catSelect.value) + '</span>' +
@@ -374,6 +387,7 @@ document.getElementById('save-post').addEventListener('click', () => {
     readTime: estimateReadTime(contentHtml),
     excerpt: excerptInput.value.trim() || (contentHtml.replace(/<[^>]+>/g,' ').trim().slice(0,140) + '…'),
     image: currentImage,
+    imageAlt: imageAltInput.value.trim(),
     contentHtml: contentHtml
   };
   const idx = postsState.findIndex(p => p.id === editingId);
@@ -391,8 +405,9 @@ function newPostForm(){
   titleInput.value = '';
   slugInput.value = '';
   delete slugInput.dataset.manual;
-  catSelect.value = 'Laminate';
+  catSelect.value = 'Interior Decor';
   excerptInput.value = '';
+  imageAltInput.value = '';
   editorArea.innerHTML = '';
   imagePreview.style.display = 'none';
   removeImageBtn.style.display = 'none';
@@ -410,6 +425,7 @@ function editPost(id){
   slugInput.dataset.manual = '1';
   catSelect.value = post.category;
   excerptInput.value = post.excerpt;
+  imageAltInput.value = post.imageAlt || '';
   editorArea.innerHTML = post.contentHtml;
   if(currentImage){
     imagePreview.src = currentImage;
@@ -739,6 +755,7 @@ document.getElementById('publish-live').addEventListener('click', async () => {
     readTime: estimateReadTime(contentHtml),
     excerpt: excerptInput.value.trim() || (contentHtml.replace(/<[^>]+>/g,' ').trim().slice(0,140) + '…'),
     image: currentImage,
+    imageAlt: imageAltInput.value.trim(),
     contentHtml: contentHtml
   };
 

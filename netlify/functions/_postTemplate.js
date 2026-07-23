@@ -16,13 +16,13 @@ function categoryChipClass(cat){
 }
 
 function renderPostPage(post, siteUrl){
-  const base = (siteUrl || 'https://thematerialdesk.netlify.app').replace(/\/$/, '');
+  const base = (siteUrl || 'https://thelivingedit.netlify.app').replace(/\/$/, '');
   const url = `${base}/posts/${post.id}.html`;
   const desc = escapeHtml(post.excerpt || '');
   const title = escapeHtml(post.title || '');
 
   const heroImg = post.image
-    ? `<img src="${post.image}" alt="${title}" style="width:100%;border-radius:3px;border:1px solid var(--line-strong);margin:22px 0 8px;">`
+    ? `<img src="${post.image}" alt="${escapeHtml(post.imageAlt || post.title)}" style="width:100%;border-radius:3px;border:1px solid var(--line-strong);margin:22px 0 8px;">`
     : `<span class="chip ${categoryChipClass(post.category)}" style="display:block;width:100%;height:220px;border-radius:3px;margin:22px 0 8px;"></span>`;
 
   const jsonLd = {
@@ -34,6 +34,7 @@ function renderPostPage(post, siteUrl){
     "author": { "@type": "Organization", "name": "The Living Edit" },
     "publisher": { "@type": "Organization", "name": "The Living Edit" },
     "description": post.excerpt,
+    ...(post.image ? { "image": post.image } : {}),
     "mainEntityOfPage": url
   };
 

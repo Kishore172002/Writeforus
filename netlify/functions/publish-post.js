@@ -9,7 +9,7 @@
      GITHUB_OWNER   — defaults to "Kishore172002"
      GITHUB_REPO    — defaults to "Writeforus"
      GITHUB_BRANCH  — defaults to "main"
-     SITE_URL       — your live URL, e.g. https://thematerialdesk.netlify.app
+     SITE_URL       — your live URL, e.g. https://thelivingedit.netlify.app
 */
 
 const { renderPostPage } = require('./_postTemplate');
@@ -17,7 +17,7 @@ const { renderPostPage } = require('./_postTemplate');
 const OWNER = process.env.GITHUB_OWNER || 'Kishore172002';
 const REPO = process.env.GITHUB_REPO || 'Writeforus';
 const BRANCH = process.env.GITHUB_BRANCH || 'main';
-const SITE_URL = process.env.SITE_URL || 'https://thematerialdesk.netlify.app';
+const SITE_URL = process.env.SITE_URL || 'https://thelivingedit.netlify.app';
 const API = 'https://api.github.com';
 
 function toB64(str) { return Buffer.from(str, 'utf8').toString('base64'); }
@@ -35,6 +35,20 @@ async function ghGet(path) {
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`GitHub GET ${path} failed: ${res.status} ${await res.text()}`);
   return res.json();
+}
+
+async function ghGetText(file) {
+  if (!file) return '';
+  if (file.content) return fromB64(file.content.replace(/\n/g, ''));
+
+  // GitHub's Contents API omits inline content for files above 1 MB.
+  // Fetch the underlying blob so image-heavy post indexes are merged
+  // instead of being mistaken for an empty database.
+  const res = await fetch(`${API}/repos/${OWNER}/${REPO}/git/blobs/${file.sha}`, { headers: ghHeaders() });
+  if (!res.ok) throw new Error(`GitHub blob GET failed: ${res.status} ${await res.text()}`);
+  const blob = await res.json();
+  if (!blob.content) throw new Error('GitHub returned an empty posts database blob.');
+  return fromB64(blob.content.replace(/\n/g, ''));
 }
 
 async function ghPut(path, content, message, sha) {
@@ -91,7 +105,7 @@ exports.handler = async function (event, context) {
 
   try {
     const dataFile = await ghGet('posts-data.js');
-    let posts = dataFile ? parsePostsFile(fromB64(dataFile.content)) : [];
+    let posts = dataFile ? parsePostsFile(await ghGetText(dataFile)) : [];
 
     if (action === 'delete') {
       posts = posts.filter(p => p.id !== post.id);

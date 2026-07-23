@@ -25,9 +25,9 @@ function categoryChipClass(cat){
 
 function postThumb(post){
   if(post.image){
-    return `<img src="${post.image}" alt="" style="width:120px;height:80px;object-fit:cover;border-radius:3px;border:1px solid var(--line-strong);">`;
+    return `<img class="post-card-thumb" src="${post.image}" alt="${mdEscape(post.imageAlt || post.title)}" loading="lazy">`;
   }
-  return `<span class="chip ${categoryChipClass(post.category)}" style="width:120px;height:80px;border-radius:3px;display:block;"></span>`;
+  return `<span class="post-card-thumb chip ${categoryChipClass(post.category)}" aria-hidden="true"></span>`;
 }
 
 function sortPostsDesc(posts){
@@ -42,12 +42,13 @@ function renderRecentPosts(containerId, count){
   el.innerHTML = posts.map((p, i) => `
     <article class="post-card">
       <span class="index">${String(i+1).padStart(2,'0')}</span>
-      <div>
+      <div class="post-card-body">
         <span class="tag">${mdEscape(p.category)}</span>
         <h3><a class="title-link" href="posts/${p.id}.html">${mdEscape(p.title)}</a></h3>
         <p>${mdEscape(p.excerpt)}</p>
         <div class="meta">${mdEscape(p.readTime)} · ${formatDate(p.date)}</div>
       </div>
+      <a class="post-card-media" href="posts/${p.id}.html" aria-label="Read ${mdEscape(p.title)}">${postThumb(p)}</a>
     </article>
   `).join('');
 }
@@ -67,17 +68,26 @@ function renderBlogList(activeCategory){
   el.innerHTML = posts.map((p, i) => `
     <article class="post-card">
       <span class="index">${String(i+1).padStart(2,'0')}</span>
-      <div>
+      <div class="post-card-body">
         <span class="tag">${mdEscape(p.category)}</span>
         <h3><a class="title-link" href="posts/${p.id}.html">${mdEscape(p.title)}</a></h3>
         <p>${mdEscape(p.excerpt)}</p>
         <div class="meta">${mdEscape(p.readTime)} · ${formatDate(p.date)}</div>
       </div>
+      <a class="post-card-media" href="posts/${p.id}.html" aria-label="Read ${mdEscape(p.title)}">${postThumb(p)}</a>
     </article>
   `).join('');
 }
 
 function initBlogFilters(){
+  const row = document.getElementById('filter-row');
+  if(row && window.SITE_POSTS){
+    const categories = [...new Set(window.SITE_POSTS.map(p => p.category).filter(Boolean))]
+      .sort((a,b) => a.localeCompare(b));
+    row.innerHTML = ['All', ...categories].map(category =>
+      `<button type="button" class="tag-pill${category === 'All' ? ' active' : ''}" data-category="${mdEscape(category)}">${mdEscape(category)}</button>`
+    ).join('');
+  }
   const pills = document.querySelectorAll('.tag-pill');
   pills.forEach(pill => {
     pill.addEventListener('click', () => {
@@ -110,7 +120,7 @@ function renderSinglePost(){
 
   document.title = post.title + ' — The Living Edit';
   const heroImg = post.image
-    ? `<img src="${post.image}" alt="${mdEscape(post.title)}" style="width:100%;border-radius:3px;border:1px solid var(--line-strong);margin:22px 0 8px;">`
+    ? `<img src="${post.image}" alt="${mdEscape(post.imageAlt || post.title)}" style="width:100%;border-radius:3px;border:1px solid var(--line-strong);margin:22px 0 8px;">`
     : `<span class="chip ${categoryChipClass(post.category)}" style="display:block;width:100%;height:220px;border-radius:3px;margin:22px 0 8px;"></span>`;
 
   el.innerHTML = `

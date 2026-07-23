@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Blog — The Living Edit</title>
-<meta name="description" content="All posts on laminate, veneer, louvers and plywood from The Living Edit.">
+<meta name="description" content="Browse all interior decor, home improvement, fashion and lifestyle articles from The Living Edit.">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -29,13 +29,9 @@
   <div class="wrap">
     <section class="lead-block">
       <h1>The Blog</h1>
-      <p class="lede">Buying guides, maintenance notes and small case studies from real renovations — organised by material.</p>
+      <p class="lede">Buying guides, maintenance notes and first-hand stories — browse every post or filter by category.</p>
       <div class="tag-row" id="filter-row">
-        <span class="tag-pill active" data-category="All">All</span>
-        <span class="tag-pill" data-category="Interior Decor">Interior Decor</span>
-        <span class="tag-pill" data-category="Home Improvement">Home Improvement</span>
-        <span class="tag-pill" data-category="Fashion">Fashion</span>
-        <span class="tag-pill" data-category="Lifestyle">Lifestyle</span>
+        <button type="button" class="tag-pill active" data-category="All">All</button>
       </div>
     </section>
 
@@ -82,7 +78,13 @@
       });
     }
     initBlogFilters();
-    if(wanted){ renderBlogList(wanted); }
+    if(wanted){
+      const matchingPill = [...document.querySelectorAll('.tag-pill')].find(p => p.dataset.category === wanted);
+      if(matchingPill){
+        document.querySelectorAll('.tag-pill').forEach(p => p.classList.toggle('active', p === matchingPill));
+        renderBlogList(wanted);
+      }
+    }
   })();
 </script>
 </body>
